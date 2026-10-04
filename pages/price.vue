@@ -191,7 +191,7 @@ const categoryImages = {
   'ผักสด': 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&q=80',
   'ผลไม้': 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80',
   'เนื้อสัตว์และอาหารทะเล': 'https://png.pngtree.com/png-clipart/20240923/original/pngtree-fresh-pork-meat-freshness-png-image_16079866.png',
-  'ดอกไม้': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&q=80',
+  'ดอกไม้': 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg',
   'ของแห้งและอื่นๆ': 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80',
   'default': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80'
 };

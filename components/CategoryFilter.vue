@@ -54,10 +54,10 @@ const categories = [
     colorClass: 'bg-[#da291c]' // Red
   },
   { 
-    name: 'อาหารทะเล', // The old card said ตลาดปลา
-    title: 'ตลาดปลา', 
-    image: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&q=80',
-    colorClass: 'bg-[#2563eb]' // Blue
+    name: 'ดอกไม้',
+    title: 'ตลาดดอกไม้', 
+    image: 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg',
+    colorClass: 'bg-[#e11d48]' // Rose
   },
   { 
     name: 'ของแห้งและอื่นๆ', 

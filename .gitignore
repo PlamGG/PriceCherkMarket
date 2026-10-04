@@ -1,0 +1,33 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# Local agent caches
+.gemini
+.agent
+.agents
+.codex
+.opencode
+.impeccable
+
+# OS files
+.DS_Store
+Thumbs.db

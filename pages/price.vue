@@ -7,8 +7,8 @@
       <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
       
       <div class="max-w-4xl mx-auto relative z-10 text-center">
-        <h1 class="text-3xl md:text-4xl font-black mb-4 tracking-tight">ค้นหาและเปรียบเทียบราคา</h1>
-        <p class="text-green-100 font-medium mb-8">เช็คราคาอัปเดตล่าสุดจากตลาดรวม ทั้งผัก ผลไม้ และเนื้อสัตว์</p>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black mb-3 tracking-tight">ค้นหาและเปรียบเทียบราคา</h1>
+        <p class="text-green-100 font-medium mb-6 text-sm sm:text-base">เช็คราคาอัปเดตล่าสุดจากตลาดรวม ทั้งผัก ผลไม้ และเนื้อสัตว์</p>
         
         <div class="relative max-w-2xl mx-auto group">
           <input 
@@ -16,7 +16,7 @@
             v-model="searchQuery" 
             @input="handleSearch"
             placeholder="พิมพ์ชื่อสินค้าที่ต้องการค้นหา เช่น กะหล่ำปลี, หมูสามชั้น..." 
-            class="w-full pl-12 pr-4 py-3.5 md:py-4 text-gray-900 bg-white rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-green-400/30 transition-all font-medium text-lg placeholder-gray-400 border border-transparent focus:border-white"
+            class="w-full pl-12 pr-4 py-3 md:py-4 text-gray-900 bg-white rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-green-400/30 transition-all font-medium text-base md:text-lg placeholder-gray-400 border border-transparent focus:border-white"
           />
           <svg class="w-6 h-6 text-market-green absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
+    <div class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full overflow-hidden">
       <div class="flex flex-col md:flex-row gap-8">
         
         <!-- Sidebar: Categories Filter -->
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Mobile Categories Horizontal Scroll -->
-        <div class="md:hidden w-full overflow-x-auto hide-scrollbar -mx-4 px-4 pb-2">
+        <div class="md:hidden w-full overflow-x-auto hide-scrollbar pb-3">
           <div class="flex space-x-2">
             <button 
               @click="selectedCategory = ''"

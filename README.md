@@ -1,67 +1,71 @@
 # 🥬 ตลาดรวม (Market Price) - Web Frontend
 
-> ระบบรายงานและเปรียบเทียบราคาสินค้าเกษตรรายวัน ออกแบบเพื่อผู้ประกอบการ พ่อค้าแม่ค้า และผู้บริโภคที่ต้องการข้อมูลราคาสินค้าที่แม่นยำ พร้อมการวิเคราะห์แนวโน้มราคาและความเคลื่อนไหวของตลาด
+> แพลตฟอร์มรายงานและเปรียบเทียบราคาสินค้าเกษตรรายวัน ออกแบบเพื่อผู้ประกอบการ พ่อค้าแม่ค้า และผู้บริโภคที่ต้องการข้อมูลราคาสินค้าที่แม่นยำ พร้อมวิเคราะห์แนวโน้มราคาและกราฟความเคลื่อนไหวของตลาดแบบครบวงจร
 
-🌐 **Live Demo (ทดลองใช้งานจริง)**: [https://pricecheck-two.vercel.app](https://pricecheck-two.vercel.app)
+🌐 **Live Demo (Vercel)**: [https://pricecheck-two.vercel.app](https://pricecheck-two.vercel.app)  
+📦 **GitHub Repository**: [https://github.com/PlamGG/PriceCherkMarket](https://github.com/PlamGG/PriceCherkMarket)
 
 ---
 
-## 📸 ภาพตัวอย่างหน้าจอ (Screenshots)
+## 📸 ภาพตัวอย่างระบบ (Screenshots & Responsive Design)
 
-### 1. หน้าแรก (Homepage & Market Pulse)
-แสดงภาพรวมตลาด สินค้าผันผวนประจำวันแยกตามฝั่งราคาขึ้น/ลง และแนวโน้มราคารายหมวดหมู่
+### 🖥️ Desktop Experience
+
+#### 1. หน้าแรก (Homepage & Market Pulse)
+แสดงภาพรวมตลาด สินค้าผันผวนประจำวันแยกตามฝั่งราคาปรับลง (น่าซื้อ) / ปรับขึ้น และแนวโน้มราคารายหมวดหมู่
 ![Homepage](./docs/screenshots/01-home.png)
 
----
-
-### 2. หน้าค้นหาและเปรียบเทียบราคา (Price & Explore)
-ค้นหาด้วยชื่อสินค้า กรองตามหมวดหมู่อย่างรวดเร็ว พร้อมแสดงส่วนต่างราคาเทียบกับเมื่อวาน
+#### 2. หน้าค้นหาและเปรียบเทียบราคา (Price & Search)
+ค้นหาด้วยชื่อสินค้า กรองหมวดหมู่ผ่าน Sidebar แสดงราคาเฉลี่ย สูงสุด-ต่ำสุด พร้อมสถานะราคาล่าสุด
 ![Price & Search](./docs/screenshots/02-price.png)
 
----
-
-### 3. หน้ารายละเอียดสินค้าและกราฟราคาย้อนหลัง (Product Detail & Trends)
-ดูกราฟแนวโน้มราคาย้อนหลัง 7 วัน ตารางเปรียบเทียบราคา และสินค้าที่เกี่ยวข้องในหมวดหมู่เดียวกัน
+#### 3. หน้ารายละเอียดสินค้า (Wholesale Board & Interactive Chart)
+ดูกราฟแนวโน้มราคาย้อนหลัง ตารางบันทึกราคา 7 วันแบบ High-Contrast Wholesale Board และสินค้าที่เกี่ยวข้อง
 ![Product Detail](./docs/screenshots/03-product-detail.png)
 
----
-
-### 4. หน้ารายการสินค้าที่ติดตาม (Watchlist)
+#### 4. หน้ารายการสินค้าที่ติดตาม (Watchlist)
 บันทึกสินค้าที่สนใจผ่านระบบ LocalStorage เพื่อตรวจเช็คความเปลี่ยนแปลงราคาได้ทันที
 ![Watchlist](./docs/screenshots/04-watchlist.png)
 
 ---
 
-### 5. รองรับการใช้งานบนมือถือ (Mobile Responsive & App-like Experience)
-เมนูแถบล่าง (Bottom Navigation) ใช้งานง่ายด้วยมือเดียว พร้อมการเลื่อนดูข้อมูลแบบ Smooth Horizontal Scroll
-<p align="center">
-  <img src="./docs/screenshots/05-mobile-home.png" width="360" alt="Mobile View" />
-</p>
+### 📱 Mobile Experience (100% Fully Responsive)
+
+รองรับการใช้งานบนสมาร์ทโฟนทุกขนาดหน้าจออย่างสมบูรณ์แบบ พร้อม **Bottom Navigation Bar** แบบ Fixed ใช้งานง่ายด้วยมือเดียว และระบบเลื่อนการ์ดแนวนอน (Touch Swipe)
+
+| หน้าแรก (Home) | ค้นหาราคา (Price) | รายละเอียด (Detail) | รายการติดตาม (Watchlist) |
+| :---: | :---: | :---: | :---: |
+| <img src="./docs/screenshots/mobile-01-home.png" width="220" alt="Mobile Home" /> | <img src="./docs/screenshots/mobile-02-price.png" width="220" alt="Mobile Price" /> | <img src="./docs/screenshots/mobile-03-detail.png" width="220" alt="Mobile Detail" /> | <img src="./docs/screenshots/mobile-04-watchlist.png" width="220" alt="Mobile Watchlist" /> |
 
 ---
 
 ## 🛠️ เทคโนโลยีหลัก (Tech Stack)
 
-- **Framework**: [Nuxt 3](https://nuxt.com/) (Vue 3 + Vite)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Data & Database**: [Supabase](https://supabase.com/) via `@nuxtjs/supabase`
-- **Data Visualization**: [Chart.js](https://www.chartjs.org/) & `vue-chartjs`
-- **State Management**: Nuxt 3 `useState` พร้อม In-memory Caching เพื่อลดปริมาณ Database Read
-- **Icons**: SVG Native & Heroicons
+- **Frontend Framework**: [Nuxt 3](https://nuxt.com/) (Vue 3, Composition API, Vite)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Custom Wholesale Data Theme & Mobile-first Breakpoints)
+- **Backend & Database**: [Supabase](https://supabase.com/) via `@nuxtjs/supabase`
+- **Data Visualization**: Native Reactive SVG & [Chart.js](https://www.chartjs.org/)
+- **State Management & Caching**: Nuxt 3 `useState` + In-memory Composable Cache เพื่อลด Database Reads
+- **Icons & Graphics**: Heroicons & Handcrafted Clean SVGs
 
 ---
 
 ## 🚀 สถาปัตยกรรมและการทำงาน (Architecture Highlights)
 
-1. **Clean Wholesale UI/UX**:
-   - การแสดงผลตัวเลขราคาแบบ `tabular-nums` เพื่อความสะดวกในการเปรียบเทียบตัวเลข
+1. **Wholesale High-Contrast Data Board**:
+   - ออกแบบโดยเน้น **Data-Density** และ **Readability** ตัวเลขราคาใช้ฟอนต์ `tabular-nums` เพื่อให้อ่านและเปรียบเทียบง่าย
    - แยกทิศทางราคาชัดเจน: 🟢 สีเขียว (ราคาถูกลง / น่าซื้อ) และ 🔴 สีแดง (ราคาปรับตัวสูงขึ้น)
-   - แถบเมนูด้านล่าง (Bottom Navigation) ปรับตามอุปกรณ์มือถืออัตโนมัติ
+   - ตารางราคาย้อนหลัง 7 วัน ปรับเป็น Mobile Card อัตโนมัติบนหน้าจอขนาดเล็ก
 
-2. **ประสิทธิภาพและการดึงข้อมูล (Performance Optimization)**:
-   - มีระบบแคชข้อมูล `cached_products` ภายในระดับ Composable เพื่อเลี่ยงการยิง Query ซ้ำซ้อน
-   - ค้นหาแบบ Debounced Search ลดภาระการประมวลผลขณะพิมพ์
-   - รูปภาพสินค้ามี Fallback Handling อัตโนมัติเมื่อรูปภาพต้นทางเสียหาย
+2. **Mobile-First Responsive Engine**:
+   - หน้าจอ `< 768px`: แสดง Bottom Navigation Bar สำหรับการสลับหน้ารวดเร็วด้วยนิ้วโป้ง
+   - ตัวกรองหมวดหมู่สลับอัตโนมัติระหว่าง Sidebar (Desktop) และ Horizontal Pill Scroll (Mobile)
+   - ระบบจัดเรียง Layout แบบไดนามิก ป้องกันปัญหา Content Overflow ในทุกความกว้างหน้าจอ
+
+3. **Performance & Caching Strategy**:
+   - แคชข้อมูลสินค้าระดับ Composable (`useProducts`) เพื่อให้การสลับหน้ารวดเร็วแบบ Instant Load
+   - ระบบ Debounced Search สำหรับค้นหาสินค้าแบบ Fuzzy Matching
+   - Fallback Image Handling เมื่อรูปภาพจากผู้จัดจำหน่ายไม่พร้อมใช้งาน
 
 ---
 
@@ -102,9 +106,9 @@
 
 ```text
 market/
-├── components/          # Vue UI Components (Search, Today, CategoryTrend, ProductCard, etc.)
+├── components/          # Vue UI Components (ProductDetail, ProductChart, Search, Today, CategoryTrend, etc.)
 ├── composables/         # Business Logic & Supabase Queries (useProducts.js)
-├── docs/                # เอกสารประกอบและรูปภาพ Screenshots
+├── docs/                # เอกสารประกอบและรูปภาพ Screenshots ทั้ง Desktop & Mobile
 │   └── screenshots/
 ├── pages/               # Nuxt File-based Routes (/, /price, /watchlist, /product/[id])
 ├── public/              # Static Assets (favicon, placeholders)
@@ -112,3 +116,8 @@ market/
 ├── nuxt.config.ts       # Nuxt Configuration & Route Rules
 └── tailwind.config.js   # Tailwind Theme Extensions
 ```
+
+---
+
+## 📄 License
+MIT License

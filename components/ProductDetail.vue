@@ -11,7 +11,7 @@
       </p>
 
       <!-- Section 1: Overview & Chart (Card Container) -->
-      <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-8">
+      <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-4 sm:p-6 md:p-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-stretch">
           
           <!-- Left: Image (4 cols) -->
@@ -28,17 +28,17 @@
 
           <!-- Right: Info & Chart (8 cols) -->
           <div class="lg:col-span-8 flex flex-col">
-            <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">{{ product.name }}</h1>
+            <h1 class="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 mb-3 tracking-tight">{{ product.name }}</h1>
             
             <div class="flex flex-wrap items-center gap-3 mb-3">
-              <span class="text-3xl md:text-4xl font-black text-gray-900 tabular-nums tracking-tight">
+              <span class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tabular-nums tracking-tight">
                 ฿{{ formatPrice(product.min_price) }} - {{ formatPrice(product.max_price) }}
               </span>
-              <span class="text-gray-500 font-semibold text-lg">/ {{ product.unit || 'กก.' }}</span>
+              <span class="text-gray-500 font-semibold text-base sm:text-lg">/ {{ product.unit || 'กก.' }}</span>
               
               <div 
                 v-if="product.priceChange !== undefined"
-                class="ml-2 px-3 py-1.5 rounded-full text-sm font-black shadow-xs flex items-center gap-1"
+                class="ml-1 sm:ml-2 px-3 py-1 rounded-full text-xs sm:text-sm font-black shadow-xs flex items-center gap-1"
                 :class="product.trend === 'down' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : (product.trend === 'up' ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-gray-100 text-gray-700 border border-gray-200')"
               >
                 <span v-if="product.trend === 'up'">↑</span>
@@ -48,7 +48,7 @@
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-4 mb-8 text-sm font-semibold">
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 text-xs sm:text-sm font-semibold">
               <div class="flex items-center gap-1.5 text-gray-600">
                 <svg class="w-4 h-4 text-market-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 <span>{{ product.market || 'ตลาดผักและสมุนไพร 2' }}</span>
@@ -60,24 +60,24 @@
             </div>
 
             <!-- Chart Section -->
-            <div class="border-t border-gray-200 pt-6 md:pt-8 flex-grow flex flex-col">
-              <div class="flex flex-wrap justify-between items-center mb-10 gap-4">
+            <div class="border-t border-gray-200 pt-6 md:pt-8 flex-grow flex flex-col overflow-hidden">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
                 <!-- Period Selectors (High-contrast solid active buttons) -->
-                <div class="flex gap-2">
-                  <button @click="setPeriod('10d')" :class="['px-4 py-1.5 text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '10d' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">10 วัน</button>
-                  <button @click="setPeriod('1m')" :class="['px-4 py-1.5 text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '1m' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">1 เดือน</button>
-                  <button @click="setPeriod('1y')" :class="['px-4 py-1.5 text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '1y' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">1 ปี</button>
+                <div class="flex gap-2 w-full sm:w-auto">
+                  <button @click="setPeriod('10d')" :class="['flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 text-xs sm:text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '10d' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">10 วัน</button>
+                  <button @click="setPeriod('1m')" :class="['flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 text-xs sm:text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '1m' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">1 เดือน</button>
+                  <button @click="setPeriod('1y')" :class="['flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 text-xs sm:text-sm transition-all rounded-lg font-bold shadow-xs', activePeriod === '1y' ? 'bg-market-green text-white border border-market-green' : 'text-gray-600 bg-white border border-gray-300 hover:border-market-green hover:text-market-green']">1 ปี</button>
                 </div>
 
                 <!-- Date Range Pill -->
-                <div class="bg-gray-100 text-gray-700 border border-gray-200 px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2">
+                <div class="bg-gray-100 text-gray-700 border border-gray-200 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto">
                   {{ dateRangeText }}
-                  <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
               </div>
 
               <!-- Real price history chart -->
-              <div class="relative w-full flex-grow min-h-[260px]">
+              <div class="relative w-full flex-grow min-h-[260px] overflow-hidden">
                 <ProductChart 
                   :priceHistory="product.price_history || []" 
                   :selectedRange="activePeriod" 
@@ -89,13 +89,13 @@
       </div>
 
       <!-- Section 2: Historical Table Section (Professional Wholesale Board) -->
-      <div v-if="tableData.length > 0" class="mt-8 bg-white rounded-3xl border border-gray-200 p-6 md:p-8 shadow-sm max-w-7xl mx-auto">
+      <div v-if="tableData.length > 0" class="mt-8 bg-white rounded-3xl border border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="font-black text-gray-900 text-2xl flex items-center gap-2">
+          <h3 class="font-black text-gray-900 text-xl sm:text-2xl flex items-center gap-2">
             <svg class="w-6 h-6 text-market-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             ตารางราคาย้อนหลัง 7 วัน
           </h3>
-          <span class="text-xs font-bold text-market-green bg-green-50 px-3.5 py-1.5 rounded-full border border-green-200 shadow-xs">
+          <span class="text-[11px] sm:text-xs font-bold text-market-green bg-green-50 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-green-200 shadow-xs">
             อัปเดตรายวัน 06:00 น.
           </span>
         </div>
@@ -158,12 +158,12 @@
       </div>
 
       <!-- Section 3: Related Products Section (High-Contrast Gray Backdrop) -->
-      <div v-if="relatedProducts.length > 0" class="mt-8 mb-12 bg-gray-100/80 rounded-3xl border border-gray-200 p-6 md:p-8 shadow-xs">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-black text-gray-900 text-xl md:text-2xl flex items-center gap-2">
+      <div v-if="relatedProducts.length > 0" class="mt-8 mb-12 bg-gray-100/80 rounded-3xl border border-gray-200 p-4 sm:p-6 md:p-8 shadow-xs">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+          <h3 class="font-black text-gray-900 text-xl sm:text-2xl flex items-center gap-2">
             สินค้าในหมวด <span class="text-market-green">{{ product.category }}</span>
           </h3>
-          <NuxtLink :to="`/price?query=${product.category}`" class="text-sm font-bold text-market-green hover:underline flex items-center gap-1 bg-white px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs">
+          <NuxtLink :to="`/price?query=${product.category}`" class="text-xs sm:text-sm font-bold text-market-green hover:underline flex items-center gap-1 bg-white px-3.5 py-1.5 rounded-full border border-gray-200 shadow-xs self-start sm:self-auto">
             ดูทั้งหมดในหมวดนี้
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </NuxtLink>

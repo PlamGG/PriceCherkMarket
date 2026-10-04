@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-market-green-light selection:text-market-green">
+  <div class="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-market-green-light selection:text-market-green overflow-x-hidden">
     <NavBar />
-    <main class="flex-grow w-full pb-16 md:pb-0">
+    <main class="flex-grow w-full pb-16 md:pb-0 overflow-x-hidden">
       <NuxtPage />
     </main>
     <Footer />

@@ -50,13 +50,13 @@ const categories = [
   { 
     name: 'เนื้อสัตว์และอาหารทะเล', 
     title: 'ตลาดเนื้อสัตว์', 
-    image: 'https://png.pngtree.com/png-clipart/20240923/original/pngtree-fresh-pork-meat-freshness-png-image_16079866.png',
+    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&q=80',
     colorClass: 'bg-[#da291c]' // Red
   },
   { 
-    name: 'ดอกไม้',
+    name: 'ดอกไม้', 
     title: 'ตลาดดอกไม้', 
-    image: 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg',
+    image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=400&q=80',
     colorClass: 'bg-[#e11d48]' // Rose
   },
   { 

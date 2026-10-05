@@ -104,12 +104,16 @@ export const useProducts = () => {
       priceChange = ((todayRecord.min_price - yesterdayRecord.min_price) / yesterdayRecord.min_price) * 100
     }
 
+    const rawImage = p.default_image_url
+    const isDeadHost = !rawImage || rawImage.includes('mgt-backend.talaadthai.com')
+    const safeImage = isDeadHost ? null : rawImage
+
     return {
       _id: p.id,
       name: p.name.replace(/^[-–\s]+/, ''),
       category: getMacroCategory(p.category, p.name),
       unit: p.unit,
-      image: p.default_image_url,
+      image: safeImage,
       min_price: todayRecord.min_price,
       max_price: todayRecord.max_price,
       price_diff: Number(Math.abs(priceDiff).toFixed(2)),

@@ -107,59 +107,27 @@
             </div>
 
             <!-- Product Grid -->
-            <div v-else-if="finalFilteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-              
-              <NuxtLink 
-                v-for="product in finalFilteredProducts" 
-                :key="product._id"
-                :to="`/product/${product._id}`"
-                class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-market-green transition-all group flex flex-col focus:outline-none focus:ring-2 focus:ring-market-green relative"
-              >
-                <!-- Image Section -->
-                <div class="w-full h-40 relative overflow-hidden rounded-t-2xl bg-gray-100 flex-shrink-0">
-                  <img 
-                    :src="product.image || getFallbackImage(product.category)" 
-                    :alt="product.name" 
-                    loading="lazy"
-                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    @error="(e) => e.target.src = getFallbackImage(product.category)" 
-                  />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-gray-800 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-                    {{ product.category || 'อื่นๆ' }}
-                  </span>
+            <div v-else-if="finalFilteredProducts.length > 0">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <ProductCard 
+                  v-for="product in displayedProducts" 
+                  :key="product._id"
+                  :product="product"
+                />
+              </div>
 
-                  <!-- Watchlist Button -->
-                  <button 
-                    @click.prevent.stop="toggleWatchlist(product._id)" 
-                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-yellow-500 shadow-md backdrop-blur transition-all flex items-center justify-center z-20 focus:outline-none group/star"
-                    :title="isWatched(product._id) ? 'ยกเลิกติดตาม' : 'ติดตามสินค้านี้'"
-                  >
-                    <svg class="w-4.5 h-4.5 transition-transform group-hover/star:scale-110" :class="isWatched(product._id) ? 'text-yellow-400 fill-current' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                    </svg>
-                  </button>
-                </div>
-
-                <div v-if="product.price_diff > 0" 
-                  class="absolute top-[135px] right-4 z-10 px-3 py-1.5 rounded-full text-sm font-black shadow-md border-2 border-white flex items-center gap-1"
-                  :class="product.trend === 'down' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
+              <!-- Load More Button -->
+              <div v-if="hasMore" class="mt-8 text-center">
+                <button 
+                  @click="loadMore"
+                  class="bg-white hover:bg-gray-50 text-market-green border border-market-green font-bold px-8 py-3 rounded-xl shadow-sm hover:shadow transition-all text-sm md:text-base inline-flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  <span class="text-[16px] leading-none">{{ product.trend === 'down' ? '↓' : '↑' }}</span>
-                  <span>{{ product.price_diff }} บ.</span>
-                </div>
-
-                <!-- Content Section -->
-                <div class="p-4 pt-6 flex-grow flex flex-col justify-between">
-                  <h3 class="font-bold text-gray-900 text-base line-clamp-1 mb-1 group-hover:text-market-green transition-colors">{{ product.name }}</h3>
-                  
-                  <div class="mt-auto pt-2 flex items-baseline gap-1">
-                    <span class="text-2xl font-black text-gray-900 tracking-tight tabular-nums">฿{{ formatPrice(product.max_price || product.min_price) }}</span>
-                    <span class="text-xs text-gray-500 font-medium">/ {{ product.unit || 'กก.' }}</span>
-                  </div>
-                </div>
-              </NuxtLink>
-
+                  <span>แสดงสินค้าเพิ่มเติม</span>
+                  <span class="text-xs bg-market-green/10 text-market-green px-2 py-0.5 rounded-full font-semibold group-hover:bg-market-green group-hover:text-white transition-colors">
+                    เหลืออีก {{ finalFilteredProducts.length - displayedProducts.length }} รายการ
+                  </span>
+                </button>
+              </div>
             </div>
 
             <!-- No Results Message -->
@@ -179,9 +147,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProducts } from '@/composables/useProducts';
+import ProductCard from '@/components/ProductCard.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -192,67 +161,25 @@ const error = ref(null);
 
 const searchQuery = ref('');
 const selectedCategory = ref('');
-const watchedMap = ref({});
 
-const syncWatched = () => {
-  if (typeof window === 'undefined') return;
-  const map = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('watched_') && localStorage.getItem(key) === 'true') {
-      const id = key.replace('watched_', '');
-      map[id] = true;
-    }
-  }
-  watchedMap.value = map;
-};
-
-const isWatched = (id) => !!watchedMap.value[id];
-
-const toggleWatchlist = (id) => {
-  if (typeof window === 'undefined' || !id) return;
-  const nextVal = !isWatched(id);
-  localStorage.setItem(`watched_${id}`, String(nextVal));
-  if (nextVal) {
-    watchedMap.value = { ...watchedMap.value, [id]: true };
-  } else {
-    const next = { ...watchedMap.value };
-    delete next[id];
-    watchedMap.value = next;
-  }
-  window.dispatchEvent(new Event('watchlist-updated'));
-};
+const PAGE_SIZE = 24;
+const displayLimit = ref(PAGE_SIZE);
 
 const categories = computed(() => {
   if (!allProducts.value) return [];
   return [...new Set(allProducts.value.map(p => p.category).filter(Boolean))].sort();
 });
 
-const categoryImages = {
-  'ผักสด': 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&q=80',
-  'ผลไม้': 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80',
-  'เนื้อสัตว์และอาหารทะเล': 'https://png.pngtree.com/png-clipart/20240923/original/pngtree-fresh-pork-meat-freshness-png-image_16079866.png',
-  'ดอกไม้': 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg',
-  'ของแห้งและอื่นๆ': 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80',
-  'default': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80'
-};
-
-const getFallbackImage = (category) => {
-  return categoryImages[category] || categoryImages['default'];
-};
-
 const handleSearch = () => {
+  displayLimit.value = PAGE_SIZE;
   router.replace({ query: { ...route.query, query: searchQuery.value } });
 };
 
 const resetFilters = () => {
   searchQuery.value = '';
   selectedCategory.value = '';
+  displayLimit.value = PAGE_SIZE;
   router.replace({ query: {} });
-};
-
-const formatPrice = (price) => {
-  return price ? Math.round(price).toLocaleString('th-TH') : '0';
 };
 
 const finalFilteredProducts = computed(() => {
@@ -275,6 +202,22 @@ const finalFilteredProducts = computed(() => {
   return result;
 });
 
+const displayedProducts = computed(() => {
+  return finalFilteredProducts.value.slice(0, displayLimit.value);
+});
+
+const hasMore = computed(() => {
+  return displayLimit.value < finalFilteredProducts.value.length;
+});
+
+const loadMore = () => {
+  displayLimit.value += PAGE_SIZE;
+};
+
+watch(selectedCategory, () => {
+  displayLimit.value = PAGE_SIZE;
+});
+
 const loadInitialState = () => {
   const query = route.query.query || '';
   
@@ -285,14 +228,15 @@ const loadInitialState = () => {
     searchQuery.value = query;
     selectedCategory.value = '';
   }
+  displayLimit.value = PAGE_SIZE;
 };
 
 watch(() => route.query.query, () => {
   loadInitialState();
 });
 
-// useAsyncData เป็น single source of truth สำหรับ loading state
-const { data: fetchedProducts, pending: loadingAsync, error: asyncError } = await useAsyncData(
+// useLazyAsyncData renders SSR quickly without blocking client navigation
+const { data: fetchedProducts, pending: loadingAsync, error: asyncError } = await useLazyAsyncData(
   'search-products',
   async () => {
     return await fetchProducts();
@@ -309,15 +253,5 @@ onMounted(() => {
     error.value = 'ไม่สามารถดึงข้อมูลได้';
   }
   loadInitialState();
-  syncWatched();
-  window.addEventListener('watchlist-updated', syncWatched);
-  window.addEventListener('storage', syncWatched);
-});
-
-onUnmounted(() => {
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('watchlist-updated', syncWatched);
-    window.removeEventListener('storage', syncWatched);
-  }
 });
 </script>

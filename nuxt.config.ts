@@ -4,7 +4,10 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
   routeRules: {
-    '/search': { redirect: '/price' }
+    '/search': { redirect: '/price' },
+    '/': { swr: 300 },
+    '/price': { swr: 300 },
+    '/product/**': { swr: 600 }
   },
   supabase: {
     redirect: false // ปิดระบบบังคับ Login สำหรับหน้าแรก

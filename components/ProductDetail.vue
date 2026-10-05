@@ -28,7 +28,22 @@
 
           <!-- Right: Info & Chart (8 cols) -->
           <div class="lg:col-span-8 flex flex-col">
-            <h1 class="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 mb-3 tracking-tight">{{ product.name }}</h1>
+            <!-- Header Title + Watchlist Button -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h1 class="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 tracking-tight">{{ product.name }}</h1>
+              
+              <button 
+                @click="toggleWatchlist" 
+                class="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                :class="isWatched ? 'bg-yellow-50 text-yellow-800 border-yellow-300 hover:bg-yellow-100' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'"
+                :title="isWatched ? 'ยกเลิกการติดตาม' : 'ติดตามราคาสินค้านี้'"
+              >
+                <svg class="w-5 h-5 transition-transform" :class="isWatched ? 'text-yellow-500 fill-current scale-110' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                </svg>
+                <span>{{ isWatched ? 'ติดตามแล้ว' : 'ติดตามสินค้านี้' }}</span>
+              </button>
+            </div>
             
             <div class="flex flex-wrap items-center gap-3 mb-3">
               <span class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tabular-nums tracking-tight">
@@ -244,7 +259,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue';
 import ProductChart from './ProductChart.vue';
 import ProductCard from './ProductCard.vue';
 import { useProducts } from '~/composables/useProducts';
@@ -253,6 +268,37 @@ const props = defineProps({
   product: Object,
   loading: Boolean,
   error: String
+});
+
+const isWatched = ref(false);
+
+const syncWatched = () => {
+  if (typeof window === 'undefined' || !props.product || !props.product._id) return;
+  isWatched.value = localStorage.getItem(`watched_${props.product._id}`) === 'true';
+};
+
+watchEffect(() => {
+  syncWatched();
+});
+
+const toggleWatchlist = () => {
+  if (typeof window === 'undefined' || !props.product || !props.product._id) return;
+  isWatched.value = !isWatched.value;
+  localStorage.setItem(`watched_${props.product._id}`, String(isWatched.value));
+  window.dispatchEvent(new Event('watchlist-updated'));
+};
+
+onMounted(() => {
+  syncWatched();
+  window.addEventListener('watchlist-updated', syncWatched);
+  window.addEventListener('storage', syncWatched);
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('watchlist-updated', syncWatched);
+    window.removeEventListener('storage', syncWatched);
+  }
 });
 
 const activePeriod = ref('1m');

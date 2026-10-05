@@ -75,8 +75,8 @@ const router = useRouter();
 const categoryCircles = [
   { name: 'ผักสด', image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80' },
   { name: 'ผลไม้', image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=150&q=80' },
-  { name: 'เนื้อสัตว์และอาหารทะเล', image: 'https://png.pngtree.com/png-clipart/20240923/original/pngtree-fresh-pork-meat-freshness-png-image_16079866.png' },
-  { name: 'ดอกไม้', image: 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg' },
+  { name: 'เนื้อสัตว์และอาหารทะเล', image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=150&q=80' },
+  { name: 'ดอกไม้', image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?w=150&q=80' },
   { name: 'ของแห้งและอื่นๆ', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=150&q=80' }
 ];
 

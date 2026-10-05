@@ -365,9 +365,11 @@ const tableData = computed(() => {
     let diffPercent = 0;
     if (index + 1 < sortedDays.length) {
       const prevRecord = sortedDays[index + 1];
-      diff = record.min_price - prevRecord.min_price;
-      if (prevRecord.min_price > 0) {
-        diffPercent = Number(((diff / prevRecord.min_price) * 100).toFixed(1));
+      const curPrice = record.max_price || record.min_price || 0;
+      const prevPrice = prevRecord.max_price || prevRecord.min_price || 0;
+      diff = curPrice - prevPrice;
+      if (prevPrice > 0) {
+        diffPercent = Number(((diff / prevPrice) * 100).toFixed(1));
       }
     }
 
@@ -390,10 +392,10 @@ const summary7Days = computed(() => {
   const maxVal = Math.max(...data.map(d => d.max));
   const minVal = Math.min(...data.map(d => d.min));
 
-  const latestMin = data[0].min;
-  const oldestMin = data[data.length - 1].min;
-  const totalDiff = latestMin - oldestMin;
-  const totalPercent = oldestMin > 0 ? Number(((totalDiff / oldestMin) * 100).toFixed(1)) : 0;
+  const latestRef = data[0].max || data[0].min || 0;
+  const oldestRef = data[data.length - 1].max || data[data.length - 1].min || 0;
+  const totalDiff = latestRef - oldestRef;
+  const totalPercent = oldestRef > 0 ? Number(((totalDiff / oldestRef) * 100).toFixed(1)) : 0;
 
   return {
     highest: maxVal,

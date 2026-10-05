@@ -94,14 +94,17 @@ export const useProducts = () => {
     const todayRecord = records.length > 0 ? records[0] : { min_price: 0, max_price: 0 }
     const yesterdayRecord = records.length > 1 ? records[1] : todayRecord
 
-    const priceDiff = todayRecord.min_price - yesterdayRecord.min_price
+    const todayPrice = todayRecord.max_price || todayRecord.min_price || 0
+    const yesterdayPrice = yesterdayRecord.max_price || yesterdayRecord.min_price || 0
+
+    const priceDiff = todayPrice - yesterdayPrice
     let trend = 'same'
     if (priceDiff < 0) trend = 'down'
     if (priceDiff > 0) trend = 'up'
 
     let priceChange = 0
-    if (yesterdayRecord.min_price > 0) {
-      priceChange = ((todayRecord.min_price - yesterdayRecord.min_price) / yesterdayRecord.min_price) * 100
+    if (yesterdayPrice > 0) {
+      priceChange = Number((((todayPrice - yesterdayPrice) / yesterdayPrice) * 100).toFixed(1))
     }
 
     const rawImage = p.default_image_url

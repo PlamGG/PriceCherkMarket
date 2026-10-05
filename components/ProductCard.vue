@@ -13,13 +13,11 @@
       <!-- Product Image -->
       <div class="h-24 md:h-32 bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-gray-100">
         <img
-          v-if="product.image"
-          :src="product.image"
+          :src="product.image || getFallbackImage(product.category)"
           :alt="product.name"
           class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105 opacity-95 group-hover:opacity-100"
           @error="handleImageError"
         />
-        <svg v-else class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
       </div>
 
       <!-- Product Details -->
@@ -30,9 +28,12 @@
         <p class="text-xs text-gray-500 mb-2 truncate">{{ product.category || 'ทั่วไป' }}</p>
 
         <div class="mt-auto flex items-end justify-between">
-          <p class="text-lg font-black text-gray-900 leading-none tabular-nums">
-            ฿{{ product.max_price ? product.max_price.toFixed(2) : (product.min_price ? product.min_price.toFixed(2) : '0.00') }}
-          </p>
+          <div class="flex items-baseline gap-1">
+            <p class="text-lg font-black text-gray-900 leading-none tabular-nums">
+              ฿{{ formatPrice(product.max_price || product.min_price) }}
+            </p>
+            <span class="text-[11px] text-gray-500 font-medium">/ {{ product.unit || 'กก.' }}</span>
+          </div>
           
           <!-- Price Change Indicator -->
           <div v-if="product.priceChange && product.priceChange < 0" class="text-green-600 tabular-nums text-[10px] font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-100">
@@ -58,7 +59,18 @@ const props = defineProps({
 })
 
 const isWatched = ref(false)
-const placeholderImage = '/placeholder.png'
+
+const categoryImages = {
+  'ผักสด': 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&q=80',
+  'ผลไม้': 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80',
+  'เนื้อสัตว์และอาหารทะเล': 'https://png.pngtree.com/png-clipart/20240923/original/pngtree-fresh-pork-meat-freshness-png-image_16079866.png',
+  'ดอกไม้': 'https://images.pexels.com/photos/30458590/pexels-photo-30458590.jpeg?cs=srgb&dl=pexels-casnafu-30458590.jpg&fm=jpg',
+  'ของแห้งและอื่นๆ': 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80',
+  'default': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80'
+}
+
+const getFallbackImage = (cat) => categoryImages[cat] || categoryImages['default']
+const formatPrice = (p) => p ? Math.round(p).toLocaleString('th-TH') : '0'
 
 onMounted(() => {
   // persist watchlist state ด้วย localStorage
@@ -68,14 +80,18 @@ onMounted(() => {
 const emit = defineEmits(['unwatched'])
 
 const handleImageError = (event) => {
-  if (event.target.src !== placeholderImage) {
-    event.target.src = placeholderImage
+  const fallback = getFallbackImage(props.product.category)
+  if (event.target.src !== fallback) {
+    event.target.src = fallback
   }
 }
 
 const toggleWatchlist = () => {
   isWatched.value = !isWatched.value
   localStorage.setItem(`watched_${props.product._id}`, String(isWatched.value))
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('watchlist-updated'))
+  }
   
   if (!isWatched.value) {
     emit('unwatched', props.product._id)

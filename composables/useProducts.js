@@ -178,6 +178,8 @@ export const useProducts = () => {
         price_records (*)
       `)
       .eq('id', productId)
+      .order('record_date', { ascending: false, foreignTable: 'price_records' })
+      .order('created_at', { ascending: false, foreignTable: 'price_records' })
       .single()
 
     if (error) {

@@ -332,7 +332,8 @@ const dateRangeText = computed(() => {
 
 const todayDateText = computed(() => {
   if (!props.product || !props.product.price_history || props.product.price_history.length === 0) return 'วันนี้ 06:00 น.';
-  const latestDate = new Date(props.product.price_history[0].record_date);
+  const latestDateMs = Math.max(...props.product.price_history.map(r => new Date(r.record_date).getTime()));
+  const latestDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
   const format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   return `${format(latestDate)} 06:00 น.`;
 });

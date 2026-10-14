@@ -112,10 +112,15 @@ const rangeMap = { '10d': 10, '1m': 30, '1y': 365 };
 const processedData = computed(() => {
   if (!props.priceHistory || props.priceHistory.length === 0) return [];
   
-  const now = new Date();
+  // Reference date: use the most recent record date in history, fallback to now
+  const latestDateMs = Math.max(...props.priceHistory.map(r => new Date(r.record_date).getTime()));
+  const refDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
+  
   const daysAgo = rangeMap[props.selectedRange] || 30;
-  const cutoffDate = new Date(now.getTime()); 
-  cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+  const cutoffDate = new Date(refDate.getTime()); 
+  // subtract (daysAgo - 1) days to include the full window ending on latest date
+  cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
+  cutoffDate.setHours(0, 0, 0, 0);
 
   const filteredData = props.priceHistory.filter(record => new Date(record.record_date) >= cutoffDate);
 

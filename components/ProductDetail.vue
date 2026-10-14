@@ -311,9 +311,13 @@ const dateRangeText = computed(() => {
   const rangeMap = { '10d': 10, '1m': 30, '1y': 365 };
   const daysAgo = rangeMap[activePeriod.value] || 30;
   
-  const now = new Date();
-  const cutoffDate = new Date(now.getTime()); 
-  cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+  // Reference date: use the most recent record date in history, fallback to now
+  const latestDateMs = Math.max(...props.product.price_history.map(r => new Date(r.record_date).getTime()));
+  const refDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
+
+  const cutoffDate = new Date(refDate.getTime()); 
+  cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
+  cutoffDate.setHours(0, 0, 0, 0);
 
   const filtered = props.product.price_history.filter(record => new Date(record.record_date) >= cutoffDate);
   if (filtered.length === 0) return 'ไม่มีข้อมูล';

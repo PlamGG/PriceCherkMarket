@@ -11,6 +11,10 @@
           <feGaussianBlur stdDeviation="2.5" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
+        <linearGradient id="price-range-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.08" />
+        </linearGradient>
       </defs>
 
       <!-- Grid Lines -->
@@ -28,16 +32,46 @@
         <text v-for="label in xLabels" :key="'gx'+label.x" :x="label.x" :y="height - padding.bottom + 15" text-anchor="end" :transform="`rotate(-40, ${label.x}, ${height - padding.bottom + 15})`">{{ label.text }}</text>
       </g>
 
-      <!-- Data Visuals -->
+      <!-- Data Visuals (Lines & Area) -->
       <g v-if="processedData.length > 1">
+        <!-- Area between Max and Min Price (Spread) -->
+        <path :d="spreadPath" fill="url(#price-range-area)"></path>
+
+        <!-- Lines -->
         <path :d="maxPath" class="transition-all duration-500 ease-in-out" fill="none" stroke="#10b981" stroke-width="3" filter="url(#glow-max)"></path>
-        <path :d="minPath" class="transition-all duration-500 ease-in-out" fill="none" stroke="#facc15" stroke-width="3" filter="url(#glow-min)"></path>
+        <path :d="minPath" class="transition-all duration-500 ease-in-out" fill="none" stroke="#f59e0b" stroke-width="3" filter="url(#glow-min)"></path>
+
+        <!-- Visible Data Point Dots -->
+        <g class="data-dots">
+          <!-- Max Price Dots (Green) -->
+          <circle 
+            v-for="(pt, idx) in pointCoords" 
+            :key="'dot-max-'+idx" 
+            :cx="pt.x" 
+            :cy="pt.yMax" 
+            r="4.5" 
+            fill="#ffffff" 
+            stroke="#10b981" 
+            stroke-width="2.5" 
+          />
+          <!-- Min Price Dots (Amber) -->
+          <circle 
+            v-for="(pt, idx) in pointCoords" 
+            :key="'dot-min-'+idx" 
+            :cx="pt.x" 
+            :cy="pt.yMin" 
+            r="4.5" 
+            fill="#ffffff" 
+            stroke="#f59e0b" 
+            stroke-width="2.5" 
+          />
+        </g>
       </g>
 
       <!-- Single Point Data Display (when only 1 day available) -->
       <g v-else-if="pointCoords.length === 1">
-        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMax" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2" filter="url(#glow-max)" />
-        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMin" r="6" fill="#facc15" stroke="#ffffff" stroke-width="2" filter="url(#glow-min)" />
+        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMax" r="7" fill="#10b981" stroke="#ffffff" stroke-width="2.5" filter="url(#glow-max)" />
+        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMin" r="7" fill="#f59e0b" stroke="#ffffff" stroke-width="2.5" filter="url(#glow-min)" />
       </g>
     </svg>
 
@@ -170,8 +204,14 @@ const bounds = computed(() => {
   if (data.length === 0) return { min: 0, max: 100, range: 100 };
   const allMins = data.map(d => d.min_price);
   const allMaxs = data.map(d => d.max_price);
-  const minVal = Math.max(0, Math.min(...allMins) - (Math.min(...allMins) * 0.05)); // 5% padding bottom
-  const maxVal = Math.max(...allMaxs) + (Math.max(...allMaxs) * 0.05); // 5% padding top
+  const rawMin = Math.min(...allMins);
+  const rawMax = Math.max(...allMaxs);
+  const rawRange = rawMax - rawMin;
+
+  // Add 15% margin (or at least 2 units if range is small) so horizontal flat lines don't hug borders
+  const margin = Math.max(rawRange * 0.15, rawMax * 0.08, 2);
+  const minVal = Math.max(0, rawMin - margin);
+  const maxVal = rawMax + margin;
   return { min: minVal, max: maxVal, range: maxVal - minVal || 1 };
 });
 

@@ -1,7 +1,7 @@
 <template>
   <div class="relative w-full h-full min-h-[320px] font-sans pb-8" ref="containerRef" @mousemove="onInteraction" @mouseleave="onLeave" @touchstart.passive="onTouchStart" @touchmove.passive="onTouchMove" @touchend="onLeave" @touchcancel="onLeave">
     
-    <svg v-if="processedData.length > 1 && width > 0" class="w-full h-full overflow-visible absolute inset-0">
+    <svg v-if="processedData.length > 0 && width > 0" class="w-full h-full overflow-visible absolute inset-0">
       <defs>
         <filter id="glow-max" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -28,21 +28,28 @@
         <text v-for="label in xLabels" :key="'gx'+label.x" :x="label.x" :y="height - padding.bottom + 15" text-anchor="end" :transform="`rotate(-40, ${label.x}, ${height - padding.bottom + 15})`">{{ label.text }}</text>
       </g>
 
-      <!-- Data Visuals (Lines Only) -->
-      <g>
+      <!-- Data Visuals -->
+      <g v-if="processedData.length > 1">
         <path :d="maxPath" class="transition-all duration-500 ease-in-out" fill="none" stroke="#10b981" stroke-width="3" filter="url(#glow-max)"></path>
         <path :d="minPath" class="transition-all duration-500 ease-in-out" fill="none" stroke="#facc15" stroke-width="3" filter="url(#glow-min)"></path>
+      </g>
+
+      <!-- Single Point Data Display (when only 1 day available) -->
+      <g v-else-if="pointCoords.length === 1">
+        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMax" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2" filter="url(#glow-max)" />
+        <circle :cx="pointCoords[0].x" :cy="pointCoords[0].yMin" r="6" fill="#facc15" stroke="#ffffff" stroke-width="2" filter="url(#glow-min)" />
       </g>
     </svg>
 
     <!-- Legend -->
-    <div v-if="processedData.length > 1" class="absolute bottom-0 left-0 right-0 flex items-center justify-start pl-[35px] gap-6 text-[11px] font-medium text-gray-500 pointer-events-none">
+    <div v-if="processedData.length > 0" class="absolute bottom-0 left-0 right-0 flex items-center justify-start pl-[35px] gap-6 text-[11px] font-medium text-gray-500 pointer-events-none">
       <div class="flex items-center gap-1.5"><div class="w-4 h-0.5 bg-[#10b981] rounded-full"></div> ราคาสูงสุด</div>
       <div class="flex items-center gap-1.5"><div class="w-4 h-0.5 bg-[#facc15] rounded-full"></div> ราคาต่ำสุด</div>
+      <div v-if="processedData.length === 1" class="text-[10px] text-gray-400 font-normal">(ข้อมูลมีเพียง 1 วัน)</div>
     </div>
 
     <!-- Empty State -->
-    <div v-if="processedData.length <= 1" class="absolute inset-0 flex items-center justify-center text-gray-400 font-semibold border-2 border-dashed border-gray-200 rounded-2xl">
+    <div v-if="processedData.length === 0" class="absolute inset-0 flex items-center justify-center text-gray-400 font-semibold border-2 border-dashed border-gray-200 rounded-2xl">
       ไม่มีข้อมูลย้อนหลังในช่วงเวลานี้
     </div>
 
@@ -112,21 +119,9 @@ const rangeMap = { '10d': 10, '1m': 30, '1y': 365 };
 const processedData = computed(() => {
   if (!props.priceHistory || props.priceHistory.length === 0) return [];
   
-  // Reference date: use the most recent record date in history, fallback to now
-  const latestDateMs = Math.max(...props.priceHistory.map(r => new Date(r.record_date).getTime()));
-  const refDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
-  
-  const daysAgo = rangeMap[props.selectedRange] || 30;
-  const cutoffDate = new Date(refDate.getTime()); 
-  // subtract (daysAgo - 1) days to include the full window ending on latest date
-  cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
-  cutoffDate.setHours(0, 0, 0, 0);
-
-  const filteredData = props.priceHistory.filter(record => new Date(record.record_date) >= cutoffDate);
-
-  const groupedData = filteredData.reduce((acc, record) => {
+  // 1. Group records by unique date first (merging morning/evening into highest max and lowest min)
+  const groupedByDate = props.priceHistory.reduce((acc, record) => {
     const dateObj = new Date(record.record_date);
-    // Format as DD/MM/YYYY
     const d = String(dateObj.getDate()).padStart(2, '0');
     const m = String(dateObj.getMonth() + 1).padStart(2, '0');
     const y = dateObj.getFullYear();
@@ -146,7 +141,27 @@ const processedData = computed(() => {
     return acc;
   }, {});
 
-  return Object.values(groupedData).sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+  // 2. Sort distinct days ascending (oldest to newest)
+  const allDistinctDays = Object.values(groupedByDate).sort(
+    (a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime()
+  );
+
+  if (allDistinctDays.length === 0) return [];
+
+  // 3. For 10d: Return the last 10 available distinct days (guarantees chart points if data exists)
+  if (props.selectedRange === '10d') {
+    return allDistinctDays.slice(-10);
+  }
+
+  // 4. For 1m and 1y: Filter by calendar cutoff date from the latest available date
+  const latestDateObj = new Date(allDistinctDays[allDistinctDays.length - 1].fullDate);
+  const daysAgo = rangeMap[props.selectedRange] || 30;
+  const cutoffDate = new Date(latestDateObj.getTime());
+  cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
+  cutoffDate.setHours(0, 0, 0, 0);
+
+  const filtered = allDistinctDays.filter(d => new Date(d.fullDate) >= cutoffDate);
+  return filtered.length > 0 ? filtered : allDistinctDays.slice(-10);
 });
 
 // Chart Math
@@ -168,8 +183,16 @@ const pointCoords = computed(() => {
   const h = height.value - padding.top - padding.bottom;
   const { min, range } = bounds.value;
 
+  // If only 1 point, center it horizontally
+  if (data.length === 1) {
+    const x = padding.left + w / 2;
+    const yMin = padding.top + h - ((data[0].min_price - min) / range) * h;
+    const yMax = padding.top + h - ((data[0].max_price - min) / range) * h;
+    return [{ x, yMin, yMax, data: data[0] }];
+  }
+
   return data.map((d, i) => {
-    const x = padding.left + (i / Math.max(1, data.length - 1)) * w;
+    const x = padding.left + (i / (data.length - 1)) * w;
     const yMin = padding.top + h - ((d.min_price - min) / range) * h;
     const yMax = padding.top + h - ((d.max_price - min) / range) * h;
     return { x, yMin, yMax, data: d };

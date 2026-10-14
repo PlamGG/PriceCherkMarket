@@ -63,14 +63,25 @@
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 text-xs sm:text-sm font-semibold">
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 text-xs sm:text-sm font-semibold">
               <div class="flex items-center gap-1.5 text-gray-600">
                 <svg class="w-4 h-4 text-market-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 <span>{{ product.market || 'ตลาดผักและสมุนไพร 2' }}</span>
               </div>
-              <div class="flex items-center gap-1.5 text-gray-500">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="flex items-center gap-1.5" :class="isOutdated ? 'text-amber-700 font-bold' : 'text-gray-500'">
+                <svg class="w-4 h-4" :class="isOutdated ? 'text-amber-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>อัปเดต: {{ todayDateText }}</span>
+                <span v-if="isOutdated" class="px-2 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-800 border border-amber-200">
+                  ไม่อัปเดต {{ daysSinceLastUpdate }} วันแล้ว
+                </span>
+              </div>
+            </div>
+
+            <!-- Outdated alert notice banner -->
+            <div v-if="isOutdated" class="mb-5 p-3 sm:p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-2.5">
+              <span class="text-base leading-none">⚠️</span>
+              <div>
+                <span class="font-bold">ข้อมูลราคาในอดีต:</span> หน้านี้แสดงราคาย้อนหลังจากการบันทึกครั้งล่าสุดเมื่อ {{ todayDateText }} ซึ่งอาจไม่สะท้อนราคาตลาดปัจจุบัน
               </div>
             </div>
 
@@ -305,37 +316,61 @@ const activePeriod = ref('1m');
 const formatPrice = (p) => p ? Math.round(p).toLocaleString('th-TH') : '0';
 const setPeriod = (p) => { activePeriod.value = p; };
 
-const dateRangeText = computed(() => {
-  if (!props.product || !props.product.price_history || props.product.price_history.length === 0) return 'ไม่มีข้อมูล';
-  
-  const rangeMap = { '10d': 10, '1m': 30, '1y': 365 };
-  const daysAgo = rangeMap[activePeriod.value] || 30;
-  
-  // Reference date: use the most recent record date in history, fallback to now
-  const latestDateMs = Math.max(...props.product.price_history.map(r => new Date(r.record_date).getTime()));
-  const refDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
-
-  const cutoffDate = new Date(refDate.getTime()); 
-  cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
-  cutoffDate.setHours(0, 0, 0, 0);
-
-  const filtered = props.product.price_history.filter(record => new Date(record.record_date) >= cutoffDate);
-  if (filtered.length === 0) return 'ไม่มีข้อมูล';
-
-  const dates = filtered.map(d => new Date(d.record_date)).sort((a, b) => a - b);
-  const start = dates[0];
-  const end = dates[dates.length - 1];
-
-  const format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-  return `${format(start)} - ${format(end)}`;
-});
-
 const todayDateText = computed(() => {
   if (!props.product || !props.product.price_history || props.product.price_history.length === 0) return 'วันนี้ 06:00 น.';
   const latestDateMs = Math.max(...props.product.price_history.map(r => new Date(r.record_date).getTime()));
   const latestDate = isFinite(latestDateMs) ? new Date(latestDateMs) : new Date();
   const format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   return `${format(latestDate)} 06:00 น.`;
+});
+
+// Check if latest data is outdated (> 14 days ago)
+const daysSinceLastUpdate = computed(() => {
+  if (!props.product || !props.product.price_history || props.product.price_history.length === 0) return 0;
+  const latestDateMs = Math.max(...props.product.price_history.map(r => new Date(r.record_date).getTime()));
+  if (!isFinite(latestDateMs)) return 0;
+  const diffMs = new Date().getTime() - latestDateMs;
+  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+});
+
+const isOutdated = computed(() => daysSinceLastUpdate.value > 14);
+
+const dateRangeText = computed(() => {
+  if (!props.product || !props.product.price_history || props.product.price_history.length === 0) return 'ไม่มีข้อมูล';
+  
+  // Group by distinct days first
+  const dateMap = new Map();
+  for (const r of props.product.price_history) {
+    if (!dateMap.has(r.record_date)) {
+      dateMap.set(r.record_date, new Date(r.record_date));
+    }
+  }
+  const allDates = Array.from(dateMap.values()).sort((a, b) => a - b);
+  if (allDates.length === 0) return 'ไม่มีข้อมูล';
+
+  let selectedDates = [];
+  if (activePeriod.value === '10d') {
+    selectedDates = allDates.slice(-10);
+  } else {
+    const rangeMap = { '1m': 30, '1y': 365 };
+    const daysAgo = rangeMap[activePeriod.value] || 30;
+    const latestDate = allDates[allDates.length - 1];
+    const cutoffDate = new Date(latestDate.getTime());
+    cutoffDate.setDate(cutoffDate.getDate() - (daysAgo - 1));
+    cutoffDate.setHours(0, 0, 0, 0);
+
+    selectedDates = allDates.filter(d => d >= cutoffDate);
+    if (selectedDates.length === 0) selectedDates = allDates.slice(-10);
+  }
+
+  const start = selectedDates[0];
+  const end = selectedDates[selectedDates.length - 1];
+  const format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+
+  if (start.getTime() === end.getTime()) {
+    return format(start);
+  }
+  return `${format(start)} - ${format(end)}`;
 });
 
 // Calculate Table Data (Last 7 distinct days)

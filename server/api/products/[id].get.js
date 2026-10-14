@@ -1,4 +1,4 @@
-import { serverSupabaseClient } from '#supabase/server'
+import { useServerSupabase } from '../../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -10,9 +10,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const client = await serverSupabaseClient(event)
-
   try {
+    const client = useServerSupabase()
+
     const { data, error } = await client
       .from('products')
       .select(`
@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
 
     return data
   } catch (error) {
+    console.error(`Server error in /api/products/${id}:`, error)
     throw createError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'เกิดข้อผิดพลาดในการดึงข้อมูลสินค้า',

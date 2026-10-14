@@ -15,6 +15,7 @@
     "@nuxt/icon": "^1.10.1",
     "@nuxtjs/supabase": "^2.0.10",
     "@nuxtjs/tailwindcss": "^6.11.4",
+    "@supabase/supabase-js": "^2.45.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.2",
     "nuxt": "^3.14.1592",

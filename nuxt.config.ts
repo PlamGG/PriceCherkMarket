@@ -2,15 +2,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: false },
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
+  modules: ['@nuxtjs/tailwindcss'],
   routeRules: {
     '/search': { redirect: '/price' },
     '/': { swr: 300 },
     '/price': { swr: 300 },
     '/product/**': { swr: 600 }
-  },
-  supabase: {
-    redirect: false // ปิดระบบบังคับ Login สำหรับหน้าแรก
   },
   app: {
     head: {

@@ -1,12 +1,12 @@
-import { serverSupabaseClient } from '#supabase/server'
+import { useServerSupabase } from '../utils/supabase'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const category = query.category
 
-  const client = await serverSupabaseClient(event)
-
   try {
+    const client = useServerSupabase()
+
     let q = client
       .from('products')
       .select('*, price_records(min_price, max_price, record_date)')
@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
     return data
 
   } catch (error) {
+    console.error('Server error in /api/products:', error)
     throw createError({
       statusCode: 500,
       statusMessage: 'เกิดข้อผิดพลาดในการดึงข้อมูลสินค้า',

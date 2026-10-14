@@ -178,13 +178,23 @@ export const useProducts = () => {
         price_records (*)
       `)
       .eq('id', productId)
-      .order('record_date', { ascending: false, foreignTable: 'price_records' })
-      .order('recorded_at', { ascending: false, foreignTable: 'price_records' })
       .single()
 
     if (error) {
       console.error('Error fetching product details:', error)
       throw error
+    }
+
+    // Sort price_records descending by record_date (and evening slot before morning slot)
+    if (data.price_records && Array.isArray(data.price_records)) {
+      data.price_records.sort((a, b) => {
+        const dateA = new Date(a.record_date).getTime();
+        const dateB = new Date(b.record_date).getTime();
+        if (dateB !== dateA) return dateB - dateA;
+        if (a.time_slot === 'evening' && b.time_slot !== 'evening') return -1;
+        if (b.time_slot === 'evening' && a.time_slot !== 'evening') return 1;
+        return 0;
+      });
     }
 
     const formatted = formatProductData(data)

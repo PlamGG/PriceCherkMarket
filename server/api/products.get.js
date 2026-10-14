@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
       .eq('is_active', true)
       .order('name', { ascending: true })
       .order('record_date', { ascending: false, foreignTable: 'price_records' })
+      .limit(2, { foreignTable: 'price_records' })
 
     if (category) {
       q = q.eq('category', category)

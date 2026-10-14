@@ -1,6 +1,4 @@
 export const useProducts = () => {
-  const supabase = useSupabaseClient()
-
   const getMacroCategory = (rawCat = '', name = '') => {
     const rc = (rawCat || '').trim()
     const n = (name || '').replace(/^[-–\s]+/, '')
@@ -134,25 +132,15 @@ export const useProducts = () => {
       return cachedProducts.value
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        price_records (min_price, max_price, record_date)
-      `)
-      .eq('is_active', true)
-      .order('name', { ascending: true })
-      .order('record_date', { ascending: false, foreignTable: 'price_records' })
-      .limit(2, { foreignTable: 'price_records' })
-
-    if (error) {
-      console.error('Error fetching products:', error)
+    try {
+      const data = await $fetch('/api/products')
+      const formatted = (data || []).map(formatProductData)
+      cachedProducts.value = formatted
+      return formatted
+    } catch (error) {
+      console.error('Error fetching products from server API:', error)
       throw error
     }
-
-    const formatted = data.map(formatProductData)
-    cachedProducts.value = formatted
-    return formatted
   }
 
   const fetchCategories = async () => {
@@ -171,35 +159,28 @@ export const useProducts = () => {
   }
 
   const fetchProductById = async (productId) => {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        price_records (*)
-      `)
-      .eq('id', productId)
-      .single()
+    try {
+      const data = await $fetch(`/api/products/${productId}`)
 
-    if (error) {
-      console.error('Error fetching product details:', error)
+      // Sort price_records descending by record_date (and evening slot before morning slot)
+      if (data && data.price_records && Array.isArray(data.price_records)) {
+        data.price_records.sort((a, b) => {
+          const dateA = new Date(a.record_date).getTime();
+          const dateB = new Date(b.record_date).getTime();
+          if (dateB !== dateA) return dateB - dateA;
+          if (a.time_slot === 'evening' && b.time_slot !== 'evening') return -1;
+          if (b.time_slot === 'evening' && a.time_slot !== 'evening') return 1;
+          return 0;
+        });
+      }
+
+      const formatted = formatProductData(data)
+      formatted.price_history = (data && data.price_records) || []
+      return formatted
+    } catch (error) {
+      console.error('Error fetching product details from server API:', error)
       throw error
     }
-
-    // Sort price_records descending by record_date (and evening slot before morning slot)
-    if (data.price_records && Array.isArray(data.price_records)) {
-      data.price_records.sort((a, b) => {
-        const dateA = new Date(a.record_date).getTime();
-        const dateB = new Date(b.record_date).getTime();
-        if (dateB !== dateA) return dateB - dateA;
-        if (a.time_slot === 'evening' && b.time_slot !== 'evening') return -1;
-        if (b.time_slot === 'evening' && a.time_slot !== 'evening') return 1;
-        return 0;
-      });
-    }
-
-    const formatted = formatProductData(data)
-    formatted.price_history = data.price_records || []
-    return formatted
   }
 
   return {

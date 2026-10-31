@@ -124,15 +124,15 @@ onMounted(async () => {
   try {
     const allProducts = await fetchProducts();
     
-    // Gainers (Price Up)
+    // Gainers (Price Up - กรอง Outlier Typo > 400%)
     gainers.value = allProducts
-      .filter(p => p.priceChange && p.priceChange > 0)
+      .filter(p => p.priceChange && p.priceChange > 0 && Math.abs(p.priceChange) <= 400)
       .sort((a, b) => b.priceChange - a.priceChange)
       .slice(0, 10);
       
-    // Losers (Price Down)
+    // Losers (Price Down - กรอง Outlier Typo > 400%)
     losers.value = allProducts
-      .filter(p => p.priceChange && p.priceChange < 0)
+      .filter(p => p.priceChange && p.priceChange < 0 && Math.abs(p.priceChange) <= 400)
       .sort((a, b) => a.priceChange - b.priceChange)
       .slice(0, 10);
 

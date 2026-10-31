@@ -138,7 +138,9 @@ onMounted(async () => {
       const dailyAverages = {};
       
       catProducts.forEach(p => {
-        if (p.priceChange !== undefined && Math.abs(p.priceChange) > maxAbsChange) {
+        // กรองค่าผิดปกติที่เป็น Typo ชัดเจน (ความผันผวนเกิน 400% หรือ 5 เท่าข้ามวัน)
+        // ยังคงรองรับสินค้าที่ราคาพุ่ง 2-3 เท่า (200%-300%) ช่วงน้ำท่วมหรือเทศกาล
+        if (p.priceChange !== undefined && Math.abs(p.priceChange) <= 400 && Math.abs(p.priceChange) > maxAbsChange) {
           maxAbsChange = Math.abs(p.priceChange);
           keyDriver = { name: p.name, change: p.priceChange };
         }
@@ -147,7 +149,11 @@ onMounted(async () => {
           p.raw_data.price_records.forEach(record => {
             const date = record.record_date.split('T')[0];
             if (!dailyAverages[date]) dailyAverages[date] = [];
-            dailyAverages[date].push((record.min_price + record.max_price) / 2);
+            let maxP = record.max_price;
+            if (record.min_price > 0 && maxP > record.min_price * 5) {
+              maxP = record.min_price;
+            }
+            dailyAverages[date].push((record.min_price + maxP) / 2);
           });
         }
       });

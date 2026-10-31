@@ -9,11 +9,12 @@ export default defineEventHandler(async (event) => {
 
     let q = client
       .from('products')
-      .select('*, price_records(min_price, max_price, record_date)')
+      .select('*, price_records(min_price, max_price, record_date, recorded_at)')
       .eq('is_active', true)
       .order('name', { ascending: true })
       .order('record_date', { ascending: false, foreignTable: 'price_records' })
-      .limit(2, { foreignTable: 'price_records' })
+      .order('recorded_at', { ascending: false, foreignTable: 'price_records' })
+      .limit(14, { foreignTable: 'price_records' })
 
     if (category) {
       q = q.eq('category', category)

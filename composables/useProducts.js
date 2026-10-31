@@ -89,11 +89,33 @@ export const useProducts = () => {
 
   const formatProductData = (p) => {
     const records = p.price_records || []
-    const todayRecord = records.length > 0 ? records[0] : { min_price: 0, max_price: 0 }
-    const yesterdayRecord = records.length > 1 ? records[1] : todayRecord
 
-    const todayPrice = todayRecord.max_price || todayRecord.min_price || 0
-    const yesterdayPrice = yesterdayRecord.max_price || yesterdayRecord.min_price || 0
+    // คัดกรองหารายการล่าสุดของแต่ละวัน (distinct dates) ป้องกันการเปรียบเทียบรอบเช้า-เย็นในวันเดียวกัน
+    const distinctDaily = []
+    const seenDates = new Set()
+    for (const r of records) {
+      const d = r.record_date ? r.record_date.split('T')[0] : null
+      if (d && !seenDates.has(d)) {
+        seenDates.add(d)
+        distinctDaily.push(r)
+      }
+    }
+
+    const todayRecord = distinctDaily.length > 0 ? distinctDaily[0] : (records[0] || { min_price: 0, max_price: 0 })
+    const yesterdayRecord = distinctDaily.length > 1 ? distinctDaily[1] : todayRecord
+
+    // กรองค่าผิดปกติหาก max_price โดดเกินจริง (> 5 เท่าของ min_price)
+    const sanitizeMaxPrice = (rec) => {
+      const minP = rec.min_price || 0
+      const maxP = rec.max_price || rec.min_price || 0
+      if (minP > 0 && maxP > minP * 5) {
+        return minP
+      }
+      return maxP
+    }
+
+    const todayPrice = sanitizeMaxPrice(todayRecord)
+    const yesterdayPrice = sanitizeMaxPrice(yesterdayRecord)
 
     const priceDiff = todayPrice - yesterdayPrice
     let trend = 'same'
@@ -116,7 +138,7 @@ export const useProducts = () => {
       unit: p.unit,
       image: safeImage,
       min_price: todayRecord.min_price,
-      max_price: todayRecord.max_price,
+      max_price: sanitizeMaxPrice(todayRecord),
       price_diff: Number(Math.abs(priceDiff).toFixed(2)),
       priceChange: priceChange,
       trend: trend,

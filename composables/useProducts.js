@@ -127,6 +127,22 @@ export const useProducts = () => {
       priceChange = Number((((todayPrice - yesterdayPrice) / yesterdayPrice) * 100).toFixed(1))
     }
 
+    // คำนวณการเปลี่ยนแปลงล่าสุดในรอบ 7 วันย้อนหลัง (สำหรับ Fallback เมื่อราคาประจำวันนิ่ง)
+    let recentPriceChange = priceChange
+    let recentPriceDiff = priceDiff
+    let recentTrend = trend
+    if (priceDiff === 0 && distinctDaily.length > 2) {
+      for (let i = 2; i < Math.min(distinctDaily.length, 8); i++) {
+        const pastPrice = sanitizeMaxPrice(distinctDaily[i])
+        if (pastPrice > 0 && pastPrice !== todayPrice) {
+          recentPriceDiff = todayPrice - pastPrice
+          recentTrend = recentPriceDiff > 0 ? 'up' : 'down'
+          recentPriceChange = Number((((todayPrice - pastPrice) / pastPrice) * 100).toFixed(1))
+          break
+        }
+      }
+    }
+
     const rawImage = p.default_image_url
     const isDeadHost = !rawImage || rawImage.includes('mgt-backend.talaadthai.com')
     const safeImage = isDeadHost ? null : rawImage
@@ -142,6 +158,9 @@ export const useProducts = () => {
       price_diff: Number(Math.abs(priceDiff).toFixed(2)),
       priceChange: priceChange,
       trend: trend,
+      recent_price_diff: Number(Math.abs(recentPriceDiff).toFixed(2)),
+      recentPriceChange: recentPriceChange,
+      recentTrend: recentTrend,
       raw_data: p,
       watched: false
     }

@@ -7,7 +7,9 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 px-2">
             <h2 class="text-2xl font-bold text-white tracking-wide flex items-center gap-2">
                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
-               สินค้าปรับราคาลง วันนี้ <span class="text-sm font-normal bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full ml-2 border border-green-500/30">น่าซื้อ</span>
+               {{ isWeeklyLosers ? 'สินค้าปรับราคาลง ล่าสุด' : 'สินค้าปรับราคาลง วันนี้' }} 
+               <span class="text-sm font-normal bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full ml-2 border border-green-500/30">น่าซื้อ</span>
+               <span v-if="isWeeklyLosers" class="text-xs font-normal text-white/70 bg-white/10 px-2 py-0.5 rounded-full border border-white/10">รอบ 7 วัน</span>
             </h2>
             <div class="hidden md:flex items-center gap-2">
                 <button @click="scrollRow(losersRow, -400)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center text-white transition-colors border border-white/20">
@@ -47,7 +49,8 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 px-2">
             <h2 class="text-2xl font-bold text-white tracking-wide flex items-center gap-2">
                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-               สินค้าปรับราคาขึ้น วันนี้
+               {{ isWeeklyGainers ? 'สินค้าปรับราคาขึ้น ล่าสุด' : 'สินค้าปรับราคาขึ้น วันนี้' }}
+               <span v-if="isWeeklyGainers" class="text-xs font-normal text-white/70 bg-white/10 px-2 py-0.5 rounded-full border border-white/10">รอบ 7 วัน</span>
             </h2>
             <div class="hidden md:flex items-center gap-2">
                 <button @click="scrollRow(gainersRow, -400)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center text-white transition-colors border border-white/20">
@@ -108,6 +111,8 @@ const { fetchProducts } = useProducts();
 
 const gainers = ref([]);
 const losers = ref([]);
+const isWeeklyGainers = ref(false);
+const isWeeklyLosers = ref(false);
 const loading = ref(true);
 const error = ref(null);
 
@@ -124,17 +129,47 @@ onMounted(async () => {
   try {
     const allProducts = await fetchProducts();
     
-    // Gainers (Price Up - กรอง Outlier Typo > 400%)
-    gainers.value = allProducts
+    // 1. ลองดึงของ "วันนี้" ก่อน
+    let todayGainers = allProducts
       .filter(p => p.priceChange && p.priceChange > 0 && Math.abs(p.priceChange) <= 400)
-      .sort((a, b) => b.priceChange - a.priceChange)
-      .slice(0, 10);
+      .sort((a, b) => b.priceChange - a.priceChange);
       
-    // Losers (Price Down - กรอง Outlier Typo > 400%)
-    losers.value = allProducts
+    let todayLosers = allProducts
       .filter(p => p.priceChange && p.priceChange < 0 && Math.abs(p.priceChange) <= 400)
-      .sort((a, b) => a.priceChange - b.priceChange)
-      .slice(0, 10);
+      .sort((a, b) => a.priceChange - b.priceChange);
+
+    // 2. Fallback: ถ้าวันนี้ปรับราคาน้อยกว่า 4 ชิ้น ให้ดึงรายการที่มีการปรับราคาล่าสุดในรอบ 7 วันมาแสดง
+    if (todayGainers.length < 4) {
+      isWeeklyGainers.value = true;
+      gainers.value = allProducts
+        .filter(p => p.recentPriceChange && p.recentPriceChange > 0 && Math.abs(p.recentPriceChange) <= 400)
+        .map(p => ({
+          ...p,
+          priceChange: p.recentPriceChange,
+          price_diff: p.recent_price_diff
+        }))
+        .sort((a, b) => b.priceChange - a.priceChange)
+        .slice(0, 10);
+    } else {
+      isWeeklyGainers.value = false;
+      gainers.value = todayGainers.slice(0, 10);
+    }
+
+    if (todayLosers.length < 4) {
+      isWeeklyLosers.value = true;
+      losers.value = allProducts
+        .filter(p => p.recentPriceChange && p.recentPriceChange < 0 && Math.abs(p.recentPriceChange) <= 400)
+        .map(p => ({
+          ...p,
+          priceChange: p.recentPriceChange,
+          price_diff: p.recent_price_diff
+        }))
+        .sort((a, b) => a.priceChange - b.priceChange)
+        .slice(0, 10);
+    } else {
+      isWeeklyLosers.value = false;
+      losers.value = todayLosers.slice(0, 10);
+    }
 
   } catch (err) {
     console.error('Failed to load products:', err);
